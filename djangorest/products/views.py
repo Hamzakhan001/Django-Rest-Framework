@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import generics
+from rest_framework import generics,mixins
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -20,7 +20,28 @@ class ProductListCreateAPIView(generics.ListCreateAPIView):
         if content is None:
             content=title
         serializer.save(content=content)
-         
+
+
+class ProductMixinView(mixins.CreateModelMixin,mixins.ListModelMixin,mixins.RetrieveModelMixin,generics.GenericAPIView):
+    
+    queryset=Product.objects.all()
+    serializer_class=PrimaryProductSerializer
+    lookup_field='pk'
+    
+    def get(self,request,*args,**kwargs):
+        pk=kwargs.get('pk') 
+        if pk is not None:
+            return self.retrieve(request,*args,**kwargs)
+        return self.list(request,*args,**kwargs)
+    
+    def post(self,request,*args,**kwargs):
+        return self.create(request,*args,*kwargs)
+    
+    def perform_create(self, serializer):
+        content=serializer.validated_data.get('content')
+        if content is None:
+            content="Single class view using mixins"
+        serializer.save(content=content)
 
 class ProductDetailAPIView(generics.RetrieveAPIView):
     queryset=Product.objects.all()
@@ -42,7 +63,7 @@ class ProductDestroyAPIView(generics.DestroyAPIView):
     queryset=Product.objects.all()
     serializer_class=PrimaryProductSerializer 
     lookup_field='pk'
-    
+     
     def perform_destroy(self, instance):
         super().perform_destroy(instance)
         
