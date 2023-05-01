@@ -20,11 +20,32 @@ class ProductListCreateAPIView(generics.ListCreateAPIView):
         if content is None:
             content=title
         serializer.save(content=content)
-        
+         
 
 class ProductDetailAPIView(generics.RetrieveAPIView):
     queryset=Product.objects.all()
-    serializer_class=PrimaryProductSerializer
+    serializer_class=PrimaryProductSerializer 
+
+
+class ProductUpdateAPIView(generics.UpdateAPIView):
+    queryset=Product.objects.all()
+    serializer_class=PrimaryProductSerializer 
+    lookup_field='pk'
+    
+    def perform_update(self, serializer):
+        instance=serializer.save()
+        if not instance.content:
+            instance.content=instance.title
+            
+
+class ProductDestroyAPIView(generics.DestroyAPIView):
+    queryset=Product.objects.all()
+    serializer_class=PrimaryProductSerializer 
+    lookup_field='pk'
+    
+    def perform_destroy(self, instance):
+        super().perform_destroy(instance)
+        
 
 
 class ProductListAPIView(generics.ListAPIView):
