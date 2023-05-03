@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .models import Product
+from .permissions import IsStaffEditorPermission
 from .serializers import PrimaryProductSerializer
 
 
@@ -12,7 +13,12 @@ class ProductListCreateAPIView(generics.ListCreateAPIView):
     queryset=Product.objects.all()
     serializer_class=PrimaryProductSerializer
     authentication_classes=[authentication.SessionAuthentication]
-    permission_classes=[permissions.IsAuthenticated]
+    #default django classes
+    # permission_classes=[permissions.DjangoModelPermissions]
+    
+    
+    #custom permission classes
+    permission_classes=[IsStaffEditorPermission]
     
     def perform_create(self, serializer):
         # print(serializer.validated_data)
